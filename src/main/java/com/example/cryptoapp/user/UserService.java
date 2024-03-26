@@ -3,11 +3,17 @@ package com.example.cryptoapp.user;
 import com.example.cryptoapp.exception.OperationConflictException;
 import com.example.cryptoapp.exception.UserNotFoundException;
 import com.example.cryptoapp.exception.ValidationException;
+import com.example.cryptoapp.security.CustomUserDetailsService;
+import com.example.cryptoapp.security.JWTGenerator;
 import com.example.cryptoapp.user.dto.*;
 import com.example.cryptoapp.user.repos.UserRepository;
 import com.example.cryptoapp.user.repos.UserRoleRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -18,13 +24,19 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
     private final UserRegistrationDtoMapper userRegistrationDtoMapper;
+    private final JWTGenerator jwtGenerator;
+    private final AuthenticationManager authenticationManager;
+    private final CustomUserDetailsService customUserDetailsService;
     private final String USER_ROLE = "USER";
     private final String ADMIN_ROLE = "ADMIN";
 
-    public UserService(UserRepository userRepository, UserRoleRepository userRoleRepository, UserRegistrationDtoMapper userRegistrationDtoMapper){
+    public UserService(UserRepository userRepository, UserRoleRepository userRoleRepository, UserRegistrationDtoMapper userRegistrationDtoMapper, JWTGenerator jwtGenerator, AuthenticationManager authenticationManager, CustomUserDetailsService customUserDetailsService){
         this.userRepository = userRepository;
         this.userRoleRepository = userRoleRepository;
         this.userRegistrationDtoMapper = userRegistrationDtoMapper;
+        this.jwtGenerator = jwtGenerator;
+        this.authenticationManager = authenticationManager;
+        this.customUserDetailsService = customUserDetailsService;
     }
 
     public Optional<UserCredentialsDto> findCredentialsByUsername(String username){
@@ -59,6 +71,16 @@ public class UserService {
         }
         User savedUser = userRepository.save(user);
         return UserDtoMapper.map(savedUser);
+    }
+
+    public AuthResponseDto login(LoginDto dto){
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                customUserDetailsService.loadUserByUsername(dto.getUsername()),
+                dto.getPassword()
+        ));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String token = jwtGenerator.generateToken(authentication);
+        return new AuthResponseDto(token);
     }
 
     public void deleteUserById(Long id){
