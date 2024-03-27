@@ -17,7 +17,8 @@ public class JWTGenerator {
     @Value("${JWT_SECRET}")
     private String JWT_SECRET;
     private SecretKey SECRET_JWT_KEY;
-    private static final long JWT_EXPIRATION = 1000 * 60 * 60 * 60;
+//    private static final long JWT_EXPIRATION = 1000 * 60 * 60 * 60;
+    private static final long JWT_EXPIRATION = 7000;
 
     @PostConstruct
     private void init(){

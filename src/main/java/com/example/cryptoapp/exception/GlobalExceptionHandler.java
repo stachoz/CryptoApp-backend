@@ -1,9 +1,9 @@
 package com.example.cryptoapp.exception;
 
-import com.example.cryptoapp.user.repos.UserRoleRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,12 +15,6 @@ import java.util.NoSuchElementException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-
-    private final UserRoleRepository userRoleRepository;
-
-    public GlobalExceptionHandler(UserRoleRepository userRoleRepository) {
-        this.userRoleRepository = userRoleRepository;
-    }
 
     @ExceptionHandler(value = {IllegalArgumentException.class})
     ResponseEntity<?> handleBadRequest(RuntimeException exception, HttpServletRequest request){
@@ -74,5 +68,15 @@ public class GlobalExceptionHandler {
                 request.getRequestURI()
         );
         return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(value = {HttpMessageNotReadableException.class})
+    ResponseEntity<?> handleEmptyRequestBody(HttpServletRequest request){
+        ApiError body = new ApiError(
+                "Required request body is missing",
+                LocalDateTime.now(),
+                request.getRequestURI()
+        );
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 }
