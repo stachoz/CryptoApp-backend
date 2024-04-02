@@ -36,7 +36,7 @@ class PostControllerTest {
 
     @BeforeEach
     public void init() {
-        addPostDto = new AddPostDto("title", "lorem ipsum");
+        addPostDto = new AddPostDto( "lorem ipsum");
     }
 
     @Test
@@ -77,7 +77,6 @@ class PostControllerTest {
     public void shouldHandleInvalidRequestBody_BlankFields() throws Exception {
         String url = "/post";
         addPostDto.setContent("");
-        addPostDto.setTitle("");
         mockMvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(addPostDto)))
@@ -97,7 +96,6 @@ class PostControllerTest {
     public void shouldHandleInvalidRequestBody_NullFields() throws Exception {
         String url = "/post";
         addPostDto.setContent(null);
-        addPostDto.setTitle(null);
         mockMvc.perform(post(url)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(null)))

@@ -13,7 +13,6 @@ import java.util.Date;
 @AllArgsConstructor
 public class PostDto {
     private Long id;
-    private String title;
     private String content;
     private Date timeAdded;
     private String author;

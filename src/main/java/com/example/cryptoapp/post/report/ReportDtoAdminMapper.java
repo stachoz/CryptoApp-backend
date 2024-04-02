@@ -8,7 +8,6 @@ public class ReportDtoAdminMapper {
         Post reportedPost = report.getPost();
         dto.setId(report.getId());
         dto.setCause(report.getCause());
-        dto.setPostTitle(reportedPost.getTitle());
         dto.setAuthorUsername(reportedPost.getUser().getUsername());
         dto.setPostId(reportedPost.getId());
         return dto;

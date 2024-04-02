@@ -97,6 +97,11 @@ public class UserService {
         return UserDtoMapper.map(user);
     }
 
+    public UserDto getUserByUsername(String username){
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
+        return UserDtoMapper.map(user);
+    }
+
     public void changeUserAccess(Long userId, UserOperationDto dto){
         User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         if(isUserAdmin(user)) throw new UserNotFoundException(user.getId());

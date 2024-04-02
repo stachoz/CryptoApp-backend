@@ -36,7 +36,6 @@ class PostServiceTest {
         user = User.builder().username("test").build();
         post1 = Post.builder()
                 .id(1L)
-                .title("title")
                 .content("lorem ipsum")
                 .timeAdded(new Date())
                 .isVerified(true)

@@ -28,10 +28,8 @@ class UserRepositoryTest {
                 .email("john@wp.pl")
                 .password("john123").build();
         post1 = Post.builder()
-                .title("post title")
                 .content("lorem ipsum").build();
         post2 = Post.builder()
-                .title("post title 2")
                 .content("lorem ipsum 2").build();
     }
 

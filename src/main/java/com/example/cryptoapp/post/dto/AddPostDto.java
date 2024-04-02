@@ -12,9 +12,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AddPostDto {
-    @NotEmpty(message = "cannot be empty")
-    @Size(max = 100)
-    private String title;
     @Size(max = 2000)
     @NotEmpty(message = "cannot be empty")
     private String content;

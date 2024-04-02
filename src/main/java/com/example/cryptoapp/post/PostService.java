@@ -12,6 +12,7 @@ import com.example.cryptoapp.user.repos.UserRepository;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +38,8 @@ public class PostService {
     }
 
     public List<PostDto> getPosts(PageRequest pr){
-        Page<Post> all = postRepository.findAllByIsVerified(true,pr);
+        PageRequest sortedPr = pr.withSort(Sort.by("timeAdded").descending());
+        Page<Post> all = postRepository.findAllByIsVerified(true,sortedPr);
         int pageNumber = pr.getPageNumber();
         if(pageNumber != 0 && pageNumber + 1 > all.getTotalPages()) throw new NoSuchElementException("page " + pageNumber + " is out of bounds");
         return all.stream()
