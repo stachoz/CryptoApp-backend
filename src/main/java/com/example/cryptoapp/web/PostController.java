@@ -3,6 +3,7 @@ package com.example.cryptoapp.web;
 
 import com.example.cryptoapp.post.PostService;
 import com.example.cryptoapp.post.dto.AddPostDto;
+import com.example.cryptoapp.post.dto.PagedResponse;
 import com.example.cryptoapp.post.dto.PostDto;
 import com.example.cryptoapp.post.post_comment.CommentDto;
 import com.example.cryptoapp.post.post_comment.CommentPostDto;
@@ -28,7 +29,7 @@ public class PostController {
     @GetMapping("/list")
     public ResponseEntity<?> getPosts(@RequestParam(value = "page", defaultValue = "0") int page,
                                       @RequestParam(value = "size", defaultValue = "10") int size){
-        List<PostDto> posts = postService.getPosts(PageRequest.of(page, size));
+        PagedResponse<PostDto> posts = postService.getPosts(PageRequest.of(page, size));
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 

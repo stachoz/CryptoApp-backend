@@ -1,10 +1,7 @@
 package com.example.cryptoapp.post;
 
 import com.example.cryptoapp.exception.OperationConflictException;
-import com.example.cryptoapp.post.dto.AddPostDto;
-import com.example.cryptoapp.post.dto.PostDto;
-import com.example.cryptoapp.post.dto.PostDtoMapper;
-import com.example.cryptoapp.post.dto.PostFormDtoMapper;
+import com.example.cryptoapp.post.dto.*;
 import com.example.cryptoapp.post.post_comment.*;
 import com.example.cryptoapp.post.report.*;
 import com.example.cryptoapp.user.User;
@@ -37,14 +34,22 @@ public class PostService {
         this.reportRepository = reportRepository;
     }
 
-    public List<PostDto> getPosts(PageRequest pr){
+    public PagedResponse<PostDto> getPosts(PageRequest pr){
         PageRequest sortedPr = pr.withSort(Sort.by("timeAdded").descending());
         Page<Post> all = postRepository.findAllByIsVerified(true,sortedPr);
         int pageNumber = pr.getPageNumber();
-        if(pageNumber != 0 && pageNumber + 1 > all.getTotalPages()) throw new NoSuchElementException("page " + pageNumber + " is out of bounds");
-        return all.stream()
+//        if(pageNumber != 0 && pageNumber + 1 > all.getTotalPages()) throw new NoSuchElementException("page " + pageNumber + " is out of bounds");
+        isPageOutOfBounds(pageNumber, all.getTotalPages());
+        List<PostDto> dtos = all.stream()
                 .map(PostDtoMapper::map)
                 .collect(Collectors.toList());
+        return new PagedResponse<PostDto>(
+                all.getTotalPages(),
+                all.getTotalElements(),
+                all.getNumber(),
+                all.getSize(),
+                dtos
+        );
     }
 
     public PostDto addPost(AddPostDto addPostDto){
@@ -91,7 +96,8 @@ public class PostService {
         if(!postRepository.existsByIdAndIsVerified(postId, true)) throw new NoSuchElementException("post with id (" + postId + ") not found");
         Page<Comment> all = commentRepository.findAllByPost_Id(postId, pr);
         int pageNumber = pr.getPageNumber();
-        if(pageNumber != 0 && pageNumber + 1 > all.getTotalPages()) throw new NoSuchElementException("page " + pageNumber + " is out of bounds");
+//        if(pageNumber != 0 && pageNumber + 1 > all.getTotalPages()) throw new NoSuchElementException("page " + pageNumber + " is out of bounds");
+        isPageOutOfBounds(pageNumber, all.getTotalPages());
         return all.stream()
                 .map(CommentDtoMapper::map)
                 .collect(Collectors.toList());
@@ -109,7 +115,8 @@ public class PostService {
         if(!postRepository.existsById(postId)) throw  new NoSuchElementException("post with id (" + postId + ") not found");
         Page<Report> pageOfReports = reportRepository.findAllByPost_Id(pageRequest, postId);
         int pageNumber = pageRequest.getPageNumber();
-        if(pageNumber != 0 && pageNumber + 1 > pageOfReports.getTotalPages()) throw new NoSuchElementException("page " + pageNumber + " is out of bounds");
+//        if(pageNumber != 0 && pageNumber + 1 > pageOfReports.getTotalPages()) throw new NoSuchElementException("page " + pageNumber + " is out of bounds");
+        isPageOutOfBounds(pageNumber, pageOfReports.getTotalPages());
         return pageOfReports.stream()
                 .map(ReportDtoAdminMapper::map)
                 .collect(Collectors.toList());
@@ -135,4 +142,9 @@ public class PostService {
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsername(name).orElseThrow(NoSuchElementException::new);
     }
+
+    private void isPageOutOfBounds(int pageNumber, int totalPages){
+        if(pageNumber != 0 && pageNumber + 1 > totalPages) throw new NoSuchElementException("page " + pageNumber + " is out of bounds");
+    }
+
 }

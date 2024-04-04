@@ -1,8 +1,10 @@
 package com.example.cryptoapp.post;
 
+import com.example.cryptoapp.post.dto.PagedResponse;
 import com.example.cryptoapp.post.dto.PostDto;
 import com.example.cryptoapp.user.User;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -48,8 +50,8 @@ class PostServiceTest {
         List<Post> posts = List.of(post1, post1);
         Page<Post> mockPage = new PageImpl<>(posts, PageRequest.of(1, 10), 1);
         when(postRepository.findAllByIsVerified(eq(true), any())).thenReturn(mockPage);
-        List<PostDto> allUsers = postService.getPosts(PageRequest.of(1, 10));
-        assertThat(allUsers.size()).isEqualTo(2);
+        PagedResponse<PostDto> pagePosts = postService.getPosts(PageRequest.of(1, 10));
+        assertThat(pagePosts.getContent().size()).isEqualTo(2);
     }
 
     @Test
@@ -64,8 +66,8 @@ class PostServiceTest {
     public void shouldReturnEmptyList_WhenThereIsNoUser(){
         PageImpl<Post> mockPage = new PageImpl<>(List.of());
         when(postRepository.findAllByIsVerified(eq(true), any())).thenReturn(mockPage);
-        List<PostDto> users = postService.getPosts(PageRequest.of(0, 3));
-        assertThat(users.size()).isEqualTo(0);
+        PagedResponse<PostDto> pagedUsers = postService.getPosts(PageRequest.of(0, 3));
+        assertThat(pagedUsers.getContent().size()).isEqualTo(0);
     }
 
     @Test

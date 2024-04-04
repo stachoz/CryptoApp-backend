@@ -17,4 +17,5 @@ public class PostDto {
     private Date timeAdded;
     private String author;
     private boolean isVerified;
+    private int comments;
 }
