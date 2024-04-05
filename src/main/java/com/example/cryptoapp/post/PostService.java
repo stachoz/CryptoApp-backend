@@ -38,12 +38,11 @@ public class PostService {
         PageRequest sortedPr = pr.withSort(Sort.by("timeAdded").descending());
         Page<Post> all = postRepository.findAllByIsVerified(true,sortedPr);
         int pageNumber = pr.getPageNumber();
-//        if(pageNumber != 0 && pageNumber + 1 > all.getTotalPages()) throw new NoSuchElementException("page " + pageNumber + " is out of bounds");
         isPageOutOfBounds(pageNumber, all.getTotalPages());
         List<PostDto> dtos = all.stream()
                 .map(PostDtoMapper::map)
                 .collect(Collectors.toList());
-        return new PagedResponse<PostDto>(
+        return new PagedResponse<>(
                 all.getTotalPages(),
                 all.getTotalElements(),
                 all.getNumber(),
@@ -94,9 +93,9 @@ public class PostService {
 
     public List<CommentDto> getPostComments(PageRequest pr, Long postId){
         if(!postRepository.existsByIdAndIsVerified(postId, true)) throw new NoSuchElementException("post with id (" + postId + ") not found");
-        Page<Comment> all = commentRepository.findAllByPost_Id(postId, pr);
+        PageRequest sortedPr = pr.withSort(Sort.by("timeAdded").descending());
+        Page<Comment> all = commentRepository.findAllByPost_Id(postId, sortedPr);
         int pageNumber = pr.getPageNumber();
-//        if(pageNumber != 0 && pageNumber + 1 > all.getTotalPages()) throw new NoSuchElementException("page " + pageNumber + " is out of bounds");
         isPageOutOfBounds(pageNumber, all.getTotalPages());
         return all.stream()
                 .map(CommentDtoMapper::map)
