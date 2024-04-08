@@ -1,6 +1,5 @@
 package com.example.cryptoapp.user;
 
-import com.example.cryptoapp.enums.UserOperationEnum;
 import com.example.cryptoapp.exception.OperationConflictException;
 import com.example.cryptoapp.exception.UserNotFoundException;
 import com.example.cryptoapp.user.dto.UserDto;

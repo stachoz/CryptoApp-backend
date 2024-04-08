@@ -60,7 +60,7 @@ public class PostController {
     @GetMapping("/{postId}/comment/list")
     public ResponseEntity<?> getPostComments(@PathVariable Long postId, @RequestParam(name = "size", defaultValue = "10") int size,
                                              @RequestParam(name = "page", defaultValue = "0") int page){
-        List<CommentDto> postComments = postService.getPostComments(PageRequest.of(page, size), postId);
+        PagedResponse<CommentDto> postComments = postService.getPostComments(PageRequest.of(page, size), postId);
         return new ResponseEntity<>(postComments, HttpStatus.OK);
     }
 

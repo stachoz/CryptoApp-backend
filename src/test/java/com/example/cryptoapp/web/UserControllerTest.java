@@ -1,6 +1,6 @@
 package com.example.cryptoapp.web;
 
-import com.example.cryptoapp.enums.UserOperationEnum;
+import com.example.cryptoapp.user.UserOperationEnum;
 import com.example.cryptoapp.exception.GlobalExceptionHandler;
 import com.example.cryptoapp.exception.OperationConflictException;
 import com.example.cryptoapp.exception.UserNotFoundException;

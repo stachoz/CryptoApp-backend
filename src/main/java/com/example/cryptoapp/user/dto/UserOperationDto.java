@@ -1,6 +1,6 @@
 package com.example.cryptoapp.user.dto;
 
-import com.example.cryptoapp.enums.UserOperationEnum;
+import com.example.cryptoapp.user.UserOperationEnum;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotNull;

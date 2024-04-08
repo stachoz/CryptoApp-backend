@@ -91,15 +91,22 @@ public class PostService {
         }
     }
 
-    public List<CommentDto> getPostComments(PageRequest pr, Long postId){
+    public PagedResponse<CommentDto> getPostComments(PageRequest pr, Long postId){
         if(!postRepository.existsByIdAndIsVerified(postId, true)) throw new NoSuchElementException("post with id (" + postId + ") not found");
         PageRequest sortedPr = pr.withSort(Sort.by("timeAdded").descending());
         Page<Comment> all = commentRepository.findAllByPost_Id(postId, sortedPr);
         int pageNumber = pr.getPageNumber();
         isPageOutOfBounds(pageNumber, all.getTotalPages());
-        return all.stream()
+        List<CommentDto> dtos = all.stream()
                 .map(CommentDtoMapper::map)
                 .collect(Collectors.toList());
+        return new PagedResponse<>(
+                all.getTotalPages(),
+                all.getTotalElements(),
+                all.getNumber(),
+                all.getSize(),
+                dtos
+        );
     }
 
 

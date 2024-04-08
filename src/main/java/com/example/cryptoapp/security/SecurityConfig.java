@@ -57,6 +57,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/post/*/report/list").hasRole(ADMIN_ROLE)
                         .requestMatchers(HttpMethod.DELETE, "/post/*/report/*").hasRole(ADMIN_ROLE)
                         .requestMatchers(HttpMethod.GET, "/coins").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/wallet/transactions").authenticated()
                         .requestMatchers(HttpMethod.POST,"/auth/**").permitAll()
                         .anyRequest().denyAll()
                 ).build();
