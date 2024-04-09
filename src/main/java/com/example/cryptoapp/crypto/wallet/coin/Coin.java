@@ -1,4 +1,4 @@
-package com.example.cryptoapp.crypto.transaction.coin;
+package com.example.cryptoapp.crypto.wallet.coin;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

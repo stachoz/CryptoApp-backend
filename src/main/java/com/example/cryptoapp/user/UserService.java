@@ -113,6 +113,11 @@ public class UserService {
         }
         userRepository.save(user);
     }
+
+    public User getCurrentUser(){
+        String name = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByUsername(name).orElseThrow(NoSuchElementException::new);
+    }
     private List<String> checkUserCredentials(User user){
         List<String> errorMessages = new ArrayList<>();
         String username = user.getUsername();

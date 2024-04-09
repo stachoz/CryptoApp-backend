@@ -1,6 +1,5 @@
 package com.example.cryptoapp.validators;
 
-import com.example.cryptoapp.crypto.transaction.TransactionType;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

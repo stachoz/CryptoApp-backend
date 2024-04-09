@@ -1,9 +1,9 @@
-package com.example.cryptoapp.crypto.transaction.dto;
+package com.example.cryptoapp.crypto.wallet.dto;
 
-import com.example.cryptoapp.crypto.transaction.TransactionType;
-import com.example.cryptoapp.crypto.transaction.coin.Coin;
-import com.example.cryptoapp.crypto.transaction.coin.CoinRepository;
-import com.example.cryptoapp.crypto.transaction.Transaction;
+import com.example.cryptoapp.crypto.wallet.TransactionType;
+import com.example.cryptoapp.crypto.wallet.coin.Coin;
+import com.example.cryptoapp.crypto.wallet.coin.CoinRepository;
+import com.example.cryptoapp.crypto.wallet.Transaction;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,7 +15,7 @@ public class TransactionDtoMapper {
     }
 
     public Transaction map(TransactionDto dto){
-        String coinName = dto.getCoinName();
+        String coinName = dto.getSymbol();
         Coin coin = coinRepository.findCoinByName(coinName).orElse(new Coin(coinName));
         Transaction transaction = new Transaction();
         transaction.setPrice(dto.getPrice());

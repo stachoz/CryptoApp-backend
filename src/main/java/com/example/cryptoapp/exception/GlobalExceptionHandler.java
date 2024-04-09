@@ -1,5 +1,6 @@
 package com.example.cryptoapp.exception;
 
+import com.binance.connector.client.exceptions.BinanceClientException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -74,6 +75,16 @@ public class GlobalExceptionHandler {
     ResponseEntity<?> handleEmptyRequestBody(HttpServletRequest request){
         ApiError body = new ApiError(
                 "Required request body is missing",
+                LocalDateTime.now(),
+                request.getRequestURI()
+        );
+        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = {BinanceClientException.class})
+    ResponseEntity<?> handleBinanceClientException(BinanceClientException e, HttpServletRequest request){
+        ApiError body = new ApiError(
+                e.getErrMsg(),
                 LocalDateTime.now(),
                 request.getRequestURI()
         );

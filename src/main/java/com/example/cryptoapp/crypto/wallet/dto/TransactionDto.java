@@ -1,20 +1,25 @@
-package com.example.cryptoapp.crypto.transaction.dto;
+package com.example.cryptoapp.crypto.wallet.dto;
 
-import com.example.cryptoapp.crypto.transaction.TransactionType;
+import com.example.cryptoapp.crypto.wallet.TransactionType;
 import com.example.cryptoapp.validators.Enum;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
+import jakarta.validation.constraints.Size;
+import lombok.*;
 
 import java.math.BigDecimal;
 
-@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 public class TransactionDto {
     @NotBlank
+    @Size(min = 2, max = 10)
     @JsonProperty("coin")
-    private String coinName;
+    private String symbol;
     @NotNull
     @Min(0)
     private BigDecimal price;

@@ -1,4 +1,4 @@
-package com.example.cryptoapp.crypto;
+package com.example.cryptoapp.crypto.wallet.coin;
 
 import org.springframework.stereotype.Service;
 

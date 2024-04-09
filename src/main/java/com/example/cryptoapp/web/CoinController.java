@@ -1,6 +1,6 @@
 package com.example.cryptoapp.web;
 
-import com.example.cryptoapp.crypto.CoinService;
+import com.example.cryptoapp.crypto.wallet.coin.CoinService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

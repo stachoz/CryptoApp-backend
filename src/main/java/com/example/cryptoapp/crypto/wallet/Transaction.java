@@ -1,6 +1,6 @@
-package com.example.cryptoapp.crypto.transaction;
+package com.example.cryptoapp.crypto.wallet;
 
-import com.example.cryptoapp.crypto.transaction.coin.Coin;
+import com.example.cryptoapp.crypto.wallet.coin.Coin;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
