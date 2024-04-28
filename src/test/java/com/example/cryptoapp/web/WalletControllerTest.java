@@ -1,12 +1,13 @@
 package com.example.cryptoapp.web;
 
-import com.example.cryptoapp.crypto.wallet.WalletService;
-import com.example.cryptoapp.crypto.wallet.dto.TransactionDto;
+import com.example.cryptoapp.crypto.coin.trasnaction.AddTransactionDto;
+import com.example.cryptoapp.crypto.coin.trasnaction.TransactionType;
+import com.example.cryptoapp.crypto.WalletService;
 import com.example.cryptoapp.exception.GlobalExceptionHandler;
+import com.example.cryptoapp.exception.OperationConflictException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -16,7 +17,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.BDDMockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {WalletController.class, GlobalExceptionHandler.class})
@@ -25,55 +28,38 @@ class WalletControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-    @Autowired
-    private ObjectMapper objectMapper;
     @MockBean
     private WalletService walletService;
+    @Autowired
+    private ObjectMapper objectMapper;
+    private String transactionsUrl = "/wallet/transactions";
+    private AddTransactionDto addTransactionDto;
+
+    @BeforeEach
+    private void init(){
+        addTransactionDto = new AddTransactionDto();
+        addTransactionDto.setSymbol("BTC");
+        addTransactionDto.setType(TransactionType.BUY);
+        addTransactionDto.setPrice(new BigDecimal("2"));
+        addTransactionDto.setQuantity(new BigDecimal("2"));
+    }
 
     @Test
-    public void shouldReturnOkOnGoodTransaction() throws Exception {
-        String url = "/wallet/transactions";
-        TransactionDto dto = new TransactionDto("BTC", new BigDecimal("1000"), new BigDecimal("0.5"), "BUY");
-        mockMvc.perform(post(url)
+    public void shouldAddFirstBuyTransaction() throws Exception {
+        mockMvc.perform(post(transactionsUrl)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isOk());
+                .content(objectMapper.writeValueAsString(addTransactionDto)))
+                .andExpect(status().isCreated());
     }
 
     @Test
-    public void shouldHandleInvalidBody_EmptySymbol() throws Exception {
-        String url = "/wallet/transactions";
-        TransactionDto dto = new TransactionDto("", new BigDecimal("1000"), new BigDecimal("0.5"), "BUY");
-        mockMvc.perform(post(url)
+    public void shouldHandleException_addFirstTransactionSell() throws Exception {
+        addTransactionDto.setType(TransactionType.SELL);
+        willThrow(new OperationConflictException("")).given(walletService).addTransaction(any());
+        mockMvc.perform(post(transactionsUrl)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isBadRequest());
+                        .content(objectMapper.writeValueAsString(addTransactionDto)))
+                .andExpect(status().isConflict());
     }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"-1", "-11111"})
-    public void shouldHandleInvalidBody_InvalidPrice(String price) throws Exception {
-        String url = "/wallet/transactions";
-        TransactionDto dto = new TransactionDto("BTC", new BigDecimal(price), new BigDecimal("0.5"), "BUY");
-        mockMvc.perform(post(url)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"-1", "-11111"})
-    public void shouldHandleInvalidBody_InvalidQuantity(String quantity) throws Exception {
-        String url = "/wallet/transactions";
-        TransactionDto dto = new TransactionDto("BTC", new BigDecimal("123"), new BigDecimal(quantity), "BUY");
-        mockMvc.perform(post(url)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isBadRequest());
-    }
-
-
-
-
 
 }

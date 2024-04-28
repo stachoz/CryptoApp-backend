@@ -1,5 +1,6 @@
-package com.example.cryptoapp.crypto.wallet.coin;
+package com.example.cryptoapp.crypto.coin.trasnaction;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -14,10 +15,17 @@ import java.math.BigDecimal;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CoinDto {
-    @Size(min = 2, max = 10)
-    private String symbol;
-    @Min(0)
+public class AddTransactionDto {
     @NotNull
+    @Size(min = 2, max = 10)
+    @JsonProperty("symbol")
+    private String symbol;
+    @NotNull
+    @Min(0)
+    private BigDecimal price;
+    @NotNull
+    @Min(0)
     private BigDecimal quantity;
+    @NotNull
+    private TransactionType type;
 }

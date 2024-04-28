@@ -1,24 +1,24 @@
 package com.example.cryptoapp.web;
 
-import com.example.cryptoapp.crypto.wallet.coin.CoinService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.example.cryptoapp.crypto.WalletService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/coins")
 public class CoinController {
-    private final CoinService coinService;
+    private final WalletService walletService;
 
-    public CoinController(CoinService coinService) {
-        this.coinService = coinService;
+    public CoinController(WalletService walletService) {
+        this.walletService = walletService;
     }
 
     @GetMapping("")
-    public List<String> getBaseCoins(){
-        return coinService.getBaseCoinsNames();
+    public ResponseEntity<?> getAllCoins(){
+        List<String> coins = walletService.getCoins();
+        return new ResponseEntity<>(coins, HttpStatus.OK);
     }
-
 }

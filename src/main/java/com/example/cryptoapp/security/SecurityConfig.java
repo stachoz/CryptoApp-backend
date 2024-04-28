@@ -19,7 +19,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.List;
 
 @EnableWebSecurity
 @Configuration
@@ -46,6 +45,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/user/*/access").hasRole(ADMIN_ROLE)
                         .requestMatchers(HttpMethod.DELETE, "/user/*").hasRole(ADMIN_ROLE)
                         .requestMatchers(HttpMethod.GET, "/user/*").authenticated()
+
                         .requestMatchers(HttpMethod.POST, "/post").hasAnyRole(ADMIN_ROLE, USER_ROLE)
                         .requestMatchers(HttpMethod.DELETE, "/post/*").hasAnyRole(ADMIN_ROLE)
                         .requestMatchers(HttpMethod.GET, "/post/*").permitAll()
@@ -56,9 +56,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE , "/post/*/comment/*").hasRole(ADMIN_ROLE)
                         .requestMatchers(HttpMethod.GET, "/post/*/report/list").hasRole(ADMIN_ROLE)
                         .requestMatchers(HttpMethod.DELETE, "/post/*/report/*").hasRole(ADMIN_ROLE)
-                        .requestMatchers(HttpMethod.GET, "/coins").permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/wallet").authenticated()
                         .requestMatchers(HttpMethod.POST, "/wallet/transactions").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/wallet/coins").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/coins").permitAll()
+
                         .requestMatchers(HttpMethod.POST,"/auth/**").permitAll()
                         .anyRequest().denyAll()
                 ).build();
