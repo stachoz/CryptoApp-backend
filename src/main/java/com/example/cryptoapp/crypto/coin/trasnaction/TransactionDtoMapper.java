@@ -19,6 +19,28 @@ public class TransactionDtoMapper {
 
     public Transaction map(AddTransactionDto dto, Optional<Transaction> lastCoinTransaction, User currentUser){
         Transaction transaction = new Transaction();
+        transaction.setUser(currentUser);
+        setTransactionValues(transaction, lastCoinTransaction, dto);
+        return transaction;
+    }
+
+    public TransactionDto map(Transaction transaction){
+        TransactionDto dto = new TransactionDto();
+        dto.setQuantity(transaction.getQuantity());
+        dto.setPrice(transaction.getPrice());
+        dto.setType(transaction.getTransactionType());
+        dto.setTotalAmount(transaction.getTotalAmount());
+        dto.setRoi(transaction.getRoi());
+        dto.setSymbol(transaction.getCoin().getName());
+        dto.setDate(transaction.getTimeAdded());
+        return dto;
+    }
+
+    public void mapDtoToExistingTransaction(AddTransactionDto dto, Transaction toUpdate, Optional<Transaction> previousTransaction){
+        setTransactionValues(toUpdate, previousTransaction, dto);
+    }
+
+    private void setTransactionValues(Transaction transaction, Optional<Transaction> lastCoinTransaction, AddTransactionDto dto){
         TransactionType transactionType = dto.getType();
         BigDecimal quantity = dto.getQuantity();
         BigDecimal price = dto.getPrice();
@@ -28,7 +50,6 @@ public class TransactionDtoMapper {
         transaction.setTransactionType(transactionType);
         Coin coin = coinRepository.findCoinByName(coinSymbol).orElseGet(() -> coinRepository.save(new Coin(coinSymbol)));
         transaction.setCoin(coin);
-        transaction.setUser(currentUser);
 
         BigDecimal value = price.multiply(quantity);
         if(lastCoinTransaction.isPresent()){
@@ -49,17 +70,5 @@ public class TransactionDtoMapper {
             transaction.setTotalAmount(quantity);
             transaction.setRoi(value.negate());
         }
-        return transaction;
-    }
-
-    public TransactionDto map(Transaction transaction){
-        TransactionDto dto = new TransactionDto();
-        dto.setQuantity(transaction.getQuantity());
-        dto.setPrice(transaction.getPrice());
-        dto.setType(transaction.getTransactionType());
-        dto.setTotalAmount(transaction.getTotalAmount());
-        dto.setRoi(transaction.getRoi());
-        dto.setSymbol(transaction.getCoin().getName());
-        return dto;
     }
 }

@@ -57,7 +57,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/post/*/report/list").hasRole(ADMIN_ROLE)
                         .requestMatchers(HttpMethod.DELETE, "/post/*/report/*").hasRole(ADMIN_ROLE)
 
-                        .requestMatchers(HttpMethod.GET, "/wallet").authenticated()
+                        .requestMatchers(HttpMethod.GET, "wallet/transactions/lastOnCoins").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "wallet/transactions/lastOnCoins/*").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "wallet/transactions/lastOnCoins/*").authenticated()
                         .requestMatchers(HttpMethod.POST, "/wallet/transactions").authenticated()
                         .requestMatchers(HttpMethod.GET, "/coins").permitAll()
 
@@ -80,7 +82,7 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
-        configuration.setAllowedMethods(Arrays.asList("GET","POST", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET","POST", "OPTIONS", "DELETE", "PUT"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

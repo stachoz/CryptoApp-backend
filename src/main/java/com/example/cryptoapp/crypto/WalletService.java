@@ -4,13 +4,13 @@ import com.binance.connector.client.exceptions.BinanceClientException;
 import com.example.cryptoapp.crypto.coin.coin.Coin;
 import com.example.cryptoapp.crypto.coin.coin.CoinRepository;
 import com.example.cryptoapp.crypto.coin.trasnaction.*;
-import com.example.cryptoapp.crypto.coin.user_coin.*;
 import com.example.cryptoapp.exception.OperationConflictException;
 import com.example.cryptoapp.user.User;
 import com.example.cryptoapp.user.UserService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -21,16 +21,14 @@ public class WalletService {
     private final UserService userService;
     private final TransactionRepository transactionRepository;
     private final TransactionDtoMapper transactionDtoMapper;
-    private final UserCoinDtoInfoMapper userCoinDtoInfoMapper;
 
     public WalletService(BinanceApiConnector binanceApiConnector, CoinRepository coinRepository, UserService userService,
-                         TransactionRepository transactionRepository, TransactionDtoMapper transactionDtoMapper, UserCoinDtoInfoMapper userCoinDtoInfoMapper) {
+                         TransactionRepository transactionRepository, TransactionDtoMapper transactionDtoMapper) {
         this.binanceApiConnector = binanceApiConnector;
         this.coinRepository = coinRepository;
         this.userService = userService;
         this.transactionRepository = transactionRepository;
         this.transactionDtoMapper = transactionDtoMapper;
-        this.userCoinDtoInfoMapper = userCoinDtoInfoMapper;
     }
 
     public List<String> getCoins(){
@@ -39,10 +37,10 @@ public class WalletService {
                 .collect(Collectors.toList());
     }
 
-    public List<UserCoinDtoInfo> getCurrentUserCoins(){
+    public List<TransactionDto> getCurrentUserLastTransactionOnUniqueCoins(){
         User user = userService.getCurrentUser();
-        return transactionRepository.getUserLastDistinctCoinsTransaction(user.getId()).stream()
-                .map(userCoinDtoInfoMapper::map)
+        return transactionRepository.getUserLastDistinctCoinsTransactions(user.getId()).stream()
+                .map(transactionDtoMapper::map)
                 .collect(Collectors.toList());
     }
 
@@ -52,6 +50,25 @@ public class WalletService {
         Optional<Transaction> lastCoinTransaction = transactionRepository.findFirstTransactionByUserIdAndAndCoin_NameOrderByTimeAddedDesc(user.getId(), symbol);
         validateTransaction(dto, lastCoinTransaction);
         Transaction saved = transactionRepository.save(transactionDtoMapper.map(dto, lastCoinTransaction, user));
+        return transactionDtoMapper.map(saved);
+    }
+
+    public void deleteLastUserTransactionOnCoin(String coinSymbol){
+        User user = userService.getCurrentUser();
+        Transaction transactionToDelete = transactionRepository.findFirstTransactionByUserIdAndAndCoin_NameOrderByTimeAddedDesc(user.getId(), coinSymbol.toUpperCase())
+                .orElseThrow(() -> new NoSuchElementException("transaction on coin (" + coinSymbol + ") does not exists"));
+        transactionRepository.delete(transactionToDelete);
+    }
+
+    public TransactionDto updateLastCoinTransaction(AddTransactionDto dto, String coinSymbolToUpdate){
+        User user = userService.getCurrentUser();
+        Long userId = user.getId();
+        Transaction transactionToUpdate = transactionRepository.findFirstTransactionByUserIdAndAndCoin_NameOrderByTimeAddedDesc(userId, coinSymbolToUpdate)
+                .orElseThrow(() -> new NoSuchElementException("transaction not found"));
+        Optional<Transaction> previousTransaction = transactionRepository.findUserSecondTransactionOnCoin(userId, coinSymbolToUpdate);
+        validateTransaction(dto, previousTransaction);
+        transactionDtoMapper.mapDtoToExistingTransaction(dto, transactionToUpdate, previousTransaction);
+        Transaction saved = transactionRepository.save(transactionToUpdate);
         return transactionDtoMapper.map(saved);
     }
 
@@ -71,12 +88,11 @@ public class WalletService {
     }
 
     private void validateTransactionType(AddTransactionDto dto, Optional<Transaction> lastCoinTransaction){
-        TransactionType transactionType = dto.getType();
         if(lastCoinTransaction.isPresent()){
-            Transaction lastTransaction = lastCoinTransaction.get();
-            if(transactionType == TransactionType.SELL && dto.getQuantity().compareTo(lastTransaction.getTotalAmount()) > 0)  throw new OperationConflictException("you can not sell more than you have");
+            if(dto.getType() == TransactionType.SELL && dto.getQuantity().compareTo(lastCoinTransaction.get().getTotalAmount()) > 0)
+                throw new OperationConflictException("you can not sell more than you have");
         } else {
-            if(transactionType == TransactionType.SELL) throw new OperationConflictException("you can not sell coin that you do not have");
+            if(dto.getType() == TransactionType.SELL) throw new OperationConflictException("you can not sell coin that you do not have");
         }
     }
 }
