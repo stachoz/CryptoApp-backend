@@ -1,6 +1,5 @@
 package com.example.cryptoapp.crypto;
 
-import com.binance.connector.client.exceptions.BinanceClientException;
 import com.example.cryptoapp.crypto.coin.coin.Coin;
 import com.example.cryptoapp.crypto.coin.coin.CoinRepository;
 import com.example.cryptoapp.crypto.coin.trasnaction.*;
@@ -16,19 +15,19 @@ import java.util.stream.Collectors;
 
 @Service
 public class WalletService {
-    private final BinanceApiConnector binanceApiConnector;
     private final CoinRepository coinRepository;
     private final UserService userService;
     private final TransactionRepository transactionRepository;
     private final TransactionDtoMapper transactionDtoMapper;
+    private final BinanceValidator binanceValidator;
 
-    public WalletService(BinanceApiConnector binanceApiConnector, CoinRepository coinRepository, UserService userService,
-                         TransactionRepository transactionRepository, TransactionDtoMapper transactionDtoMapper) {
-        this.binanceApiConnector = binanceApiConnector;
+    public WalletService(CoinRepository coinRepository, UserService userService,
+                         TransactionRepository transactionRepository, TransactionDtoMapper transactionDtoMapper, BinanceValidator binanceValidator) {
         this.coinRepository = coinRepository;
         this.userService = userService;
         this.transactionRepository = transactionRepository;
         this.transactionDtoMapper = transactionDtoMapper;
+        this.binanceValidator = binanceValidator;
     }
 
     public List<String> getCoins(){
@@ -65,7 +64,7 @@ public class WalletService {
         Long userId = user.getId();
         Transaction transactionToUpdate = transactionRepository.findFirstTransactionByUserIdAndAndCoin_NameOrderByTimeAddedDesc(userId, coinSymbolToUpdate)
                 .orElseThrow(() -> new NoSuchElementException("transaction not found"));
-        Optional<Transaction> previousTransaction = transactionRepository.findUserSecondTransactionOnCoin(userId, coinSymbolToUpdate);
+        Optional<Transaction> previousTransaction = transactionRepository.findUserSecondTransactionOnCoin(userId, dto.getSymbol());
         validateTransaction(dto, previousTransaction);
         transactionDtoMapper.mapDtoToExistingTransaction(dto, transactionToUpdate, previousTransaction);
         Transaction saved = transactionRepository.save(transactionToUpdate);
@@ -74,18 +73,10 @@ public class WalletService {
 
     private void validateTransaction(AddTransactionDto dto,  Optional<Transaction> lastCoinTransaction){
         String coinSymbol = dto.getSymbol();
-        validateCoinBinanceSupport(coinSymbol);
+        binanceValidator.validateCoinBinanceSupport(coinSymbol);
         validateTransactionType(dto, lastCoinTransaction);
     }
 
-    /**
-     * @throws BinanceClientException
-     */
-    private void validateCoinBinanceSupport(String symbol){
-        if(!coinRepository.existsByName(symbol)){
-            binanceApiConnector.averagePriceRequest(symbol);
-        }
-    }
 
     private void validateTransactionType(AddTransactionDto dto, Optional<Transaction> lastCoinTransaction){
         if(lastCoinTransaction.isPresent()){

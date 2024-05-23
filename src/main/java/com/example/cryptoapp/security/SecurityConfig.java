@@ -63,6 +63,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/wallet/transactions").authenticated()
                         .requestMatchers(HttpMethod.GET, "/coins").permitAll()
 
+                        .requestMatchers(HttpMethod.POST, "/alert").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/alert").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/alert/*").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/alert/send/*").authenticated()
+
                         .requestMatchers(HttpMethod.POST,"/auth/**").permitAll()
                         .anyRequest().denyAll()
                 ).build();

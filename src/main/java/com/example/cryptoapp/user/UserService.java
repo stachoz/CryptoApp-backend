@@ -39,12 +39,6 @@ public class UserService {
         this.customUserDetailsService = customUserDetailsService;
     }
 
-    public Optional<UserCredentialsDto> findCredentialsByUsername(String username){
-        return userRepository.findByUsername(username).map(
-                UserCredentialsDtoMapper::map
-        );
-    }
-
     public List<UserDto> getAllUsers(PageRequest pageRequest) {
         Page<User> pageOfUsers = userRepository.findAll(pageRequest);
         int pageNumber = pageRequest.getPageNumber();
