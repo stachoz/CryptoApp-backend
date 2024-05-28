@@ -17,7 +17,6 @@ public class AlertDtoMapper {
         Alert alert = new Alert();
         alert.setInitialPrice(dto.getInitialPrice());
         alert.setAlertPrice(dto.getAlertPrice());
-        alert.setRepeatTimes(dto.getRepeatTimes());
         alert.setUser(currentUser);
         String coinSymbol = dto.getCoinSymbol();
         Coin coin = coinRepository.findCoinByName(coinSymbol).orElseGet(() -> coinRepository.save(new Coin(coinSymbol)));
@@ -30,7 +29,6 @@ public class AlertDtoMapper {
         alertDto.setId(alert.getId());
         alertDto.setInitialPrice(alert.getInitialPrice());
         alertDto.setAlertPrice(alert.getAlertPrice());
-        alertDto.setRepeatTimes(alert.getRepeatTimes());
         alertDto.setCoinSymbol(alert.getCoin().getName());
         return alertDto;
     }

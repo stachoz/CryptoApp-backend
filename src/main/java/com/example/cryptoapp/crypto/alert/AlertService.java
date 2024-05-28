@@ -11,6 +11,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
+import org.hibernate.StaleObjectStateException;
+import org.springframework.dao.PessimisticLockingFailureException;
+import org.springframework.mail.MailSendException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -71,20 +74,25 @@ public class AlertService {
 
     @Transactional
     public void sendAlertById(Long id){
-        Alert alert = alertRepository.findById(id).orElseThrow(() -> new NoSuchElementException("alert with id (" + id + ") does not exists"));
-        int repeatTimes = alert.getRepeatTimes();
-        BigDecimal initialPrice = alert.getInitialPrice();
-        BigDecimal alertPrice = alert.getAlertPrice();
-        String coinName = alert.getCoin().getName();
-        String mailSubject = coinName + " price is " + alertPrice + "$!";
-        String mailBody = coinName + " price has " + specifyPriceDirection(initialPrice, alertPrice) +
-                " from " + initialPrice + "$ to " + alertPrice + "$.";
-        System.out.println(mailBody);
-        mailService.sendEmail(alert.getUser().getEmail(), mailSubject, mailBody);
-        if(repeatTimes == 1) alertRepository.delete(alert);
-        else {
-            alert.setRepeatTimes(repeatTimes - 1);
-            alertRepository.save(alert);
+        try {
+            System.out.println("START");
+            Alert alert = alertRepository.findByIdWithLock(id).orElseThrow(() -> new NoSuchElementException("alert with id (" + id + ") does not exists"));
+            alertRepository.deleteById(id);
+            BigDecimal initialPrice = alert.getInitialPrice();
+            BigDecimal alertPrice = alert.getAlertPrice();
+            String coinName = alert.getCoin().getName();
+            String mailSubject = coinName + " price is " + alertPrice + "$!";
+            String mailBody = coinName + " price has " + specifyPriceDirection(initialPrice, alertPrice) +
+                    " from " + initialPrice + "$ to " + alertPrice + "$.";
+            System.out.println(mailBody);
+            mailService.sendEmail(alert.getUser().getEmail(), mailSubject, mailBody);
+            System.out.println("STOP");
+        } catch (StaleObjectStateException e){
+            System.out.println(e.getMessage());
+        } catch (MailSendException e){
+            System.out.println(e.getMessage());
+        } catch (PessimisticLockingFailureException e) {
+            System.out.println("Failed to acquire lock: " + e.getMessage());
         }
     }
 

@@ -3,8 +3,6 @@ package com.example.cryptoapp.crypto.alert;
 import com.example.cryptoapp.crypto.coin.coin.Coin;
 import com.example.cryptoapp.user.User;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,9 +27,6 @@ public class Alert {
     @Column(scale = 7, precision = 30)
     private BigDecimal alertPrice;
 
-    @Min(1)
-    @Max(100)
-    private int repeatTimes;
     @ManyToOne(fetch = FetchType.EAGER)
     private User user;
 
