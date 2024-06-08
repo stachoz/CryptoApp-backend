@@ -1,31 +1,29 @@
 package com.example.cryptoapp.post.report;
 
 import com.example.cryptoapp.post.Post;
-import io.micrometer.common.lang.Nullable;
+import com.example.cryptoapp.post.post_comment.Comment;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.validator.constraints.Length;
 
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class Report {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Size(max = 300)
-    @Nullable
+    @NotNull
+    @Length(min = 2, max = 200)
     private String cause;
-    @ManyToOne()
-    @JoinColumn(
-            name = "post_id",
-            referencedColumnName = "id"
-    )
+    @ManyToOne
     private Post post;
+    @ManyToOne
+    private Comment comment;
 }

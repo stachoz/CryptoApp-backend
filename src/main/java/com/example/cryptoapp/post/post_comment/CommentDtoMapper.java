@@ -1,7 +1,10 @@
 package com.example.cryptoapp.post.post_comment;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public class CommentDtoMapper {
-    public static CommentDto map(Comment comment){
+    public CommentDto map(Comment comment){
         CommentDto dto = new CommentDto();
         dto.setId(comment.getId());
         dto.setContent(comment.getContent());

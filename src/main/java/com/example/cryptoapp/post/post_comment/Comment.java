@@ -1,6 +1,7 @@
 package com.example.cryptoapp.post.post_comment;
 
 import com.example.cryptoapp.post.Post;
+import com.example.cryptoapp.post.report.Report;
 import com.example.cryptoapp.user.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
@@ -11,7 +12,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -42,4 +45,10 @@ public class Comment {
             referencedColumnName = "id"
     )
     private Post post;
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "comment_id")
+    private List<Report> reports = new ArrayList<>();
+    public void addReport(Report report) {
+        reports.add(report);
+    }
 }

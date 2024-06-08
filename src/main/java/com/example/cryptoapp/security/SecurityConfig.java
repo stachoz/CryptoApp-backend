@@ -49,7 +49,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/post").hasAnyRole(ADMIN_ROLE, USER_ROLE)
                         .requestMatchers(HttpMethod.DELETE, "/post/*").hasAnyRole(ADMIN_ROLE)
                         .requestMatchers(HttpMethod.GET, "/post/*").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/post/*/report").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/post/report/list").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/post/*/report").authenticated() // make if only for admin and moderator
+                        .requestMatchers(HttpMethod.GET, "/post/comment/report/list").authenticated() // this one too
+                        .requestMatchers(HttpMethod.POST, "/post/comment/*/report").authenticated()
                         .requestMatchers(HttpMethod.POST, "/post/*/verify").hasRole(ADMIN_ROLE)
                         .requestMatchers(HttpMethod.POST, "/post/*/comment").authenticated()
                         .requestMatchers(HttpMethod.GET , "/post/*/comment/list").permitAll()

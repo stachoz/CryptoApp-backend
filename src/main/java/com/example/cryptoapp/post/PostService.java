@@ -23,12 +23,18 @@ public class PostService {
     private final CommentRepository commentRepository;
     private final ReportRepository reportRepository;
     private final UserService userService;
+    private final ReportDtoMapper reportDtoMapper;
+    private final CommentDtoMapper commentDtoMapper;
+    private final PostDtoMapper postDtoMapper;
 
-    public PostService(PostRepository postRepository, CommentRepository commentRepository, ReportRepository reportRepository, UserService userService){
+    public PostService(PostRepository postRepository, CommentRepository commentRepository, ReportRepository reportRepository, UserService userService, ReportDtoMapper reportDtoMapper, CommentDtoMapper commentDtoMapper, PostDtoMapper postDtoMapper){
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
         this.reportRepository = reportRepository;
         this.userService = userService;
+        this.reportDtoMapper = reportDtoMapper;
+        this.commentDtoMapper = commentDtoMapper;
+        this.postDtoMapper = postDtoMapper;
     }
 
     public PagedResponse<PostDto> getPosts(PageRequest pr){
@@ -37,7 +43,7 @@ public class PostService {
         int pageNumber = pr.getPageNumber();
         isPageOutOfBounds(pageNumber, all.getTotalPages());
         List<PostDto> dtos = all.stream()
-                .map(PostDtoMapper::map)
+                .map(post -> postDtoMapper.map(post))
                 .collect(Collectors.toList());
         return new PagedResponse<>(
                 all.getTotalPages(),
@@ -54,12 +60,12 @@ public class PostService {
         post.setUser(currentUser);
         if(currentUser.isPostVerification()) post.setVerified(false);
         Post savedPost = postRepository.save(post);
-        return PostDtoMapper.map(savedPost);
+        return postDtoMapper.map(savedPost);
     }
 
     public PostDto getPostById(Long id) {
         Optional<Post> post = postRepository.findById(id);
-        return post.map(PostDtoMapper::map)
+        return post.map(p -> postDtoMapper.map(p))
                 .orElseThrow(() -> new NoSuchElementException("post with id (" + id + ") not found"));
     }
 
@@ -95,7 +101,7 @@ public class PostService {
         int pageNumber = pr.getPageNumber();
         isPageOutOfBounds(pageNumber, all.getTotalPages());
         List<CommentDto> dtos = all.stream()
-                .map(CommentDtoMapper::map)
+                .map(comment -> commentDtoMapper.map(comment))
                 .collect(Collectors.toList());
         return new PagedResponse<>(
                 all.getTotalPages(),
@@ -107,20 +113,24 @@ public class PostService {
     }
 
 
-    public void reportPost(ReportPostDto reportFormDto, Long postId){
+    public void reportPost(ReportDto reportFormDto, Long postId){
         Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("post with id (" + postId + ") not found"));
-        Report report = ReportPostDtoMapper.map(reportFormDto);
-        report.setPost(post);
-        reportRepository.save(report);
+        Report report = reportDtoMapper.mapToPostReportDto(reportFormDto);
+        post.addReport(report);
+        postRepository.save(post);
     }
 
-    public List<ReportDtoAdmin> getPostReports(Long postId, PageRequest pageRequest){
-        if(!postRepository.existsById(postId)) throw  new NoSuchElementException("post with id (" + postId + ") not found");
-        Page<Report> pageOfReports = reportRepository.findAllByPost_Id(pageRequest, postId);
-        int pageNumber = pageRequest.getPageNumber();
-        isPageOutOfBounds(pageNumber, pageOfReports.getTotalPages());
-        return pageOfReports.stream()
-                .map(ReportDtoAdminMapper::map)
+    public List<PostReportDto> getPostReports(){
+        return reportRepository.getAllPostReports()
+                .stream()
+                .map(report -> reportDtoMapper.mapToPostReportDto(report))
+                .collect(Collectors.toList());
+    }
+
+    public List<CommentReportDto> getCommentReports(){
+        return reportRepository.getAllCommentReports()
+                .stream()
+                .map(report -> reportDtoMapper.mapToCommentReportDto(report))
                 .collect(Collectors.toList());
     }
 
@@ -138,6 +148,13 @@ public class PostService {
         if(post.isVerified()) throw new OperationConflictException("post is already verified");
         post.setVerified(true);
         postRepository.save(post);
+    }
+
+    public void reportComment(Long commentId, ReportDto reportDto) {
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NoSuchElementException("comment with id (" + commentId + ") not found"));
+        Report report = reportDtoMapper.mapToPostReportDto(reportDto);
+        comment.addReport(report);
+        commentRepository.save(comment);
     }
 
     private void isPageOutOfBounds(int pageNumber, int totalPages){

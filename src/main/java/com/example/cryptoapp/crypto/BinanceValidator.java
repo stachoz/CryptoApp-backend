@@ -16,7 +16,7 @@ public class BinanceValidator {
 
     /**
      * @throws BinanceClientException
-     * exception in caught inside GlobalExceptionHandler
+     * exception is caught inside GlobalExceptionHandler
      */
     public void validateCoinBinanceSupport(String symbol){
         if(!coinRepository.existsByName(symbol)){

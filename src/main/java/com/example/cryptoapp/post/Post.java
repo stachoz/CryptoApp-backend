@@ -1,6 +1,5 @@
 package com.example.cryptoapp.post;
 
-
 import com.example.cryptoapp.post.post_comment.Comment;
 import com.example.cryptoapp.post.report.Report;
 import com.example.cryptoapp.user.User;
@@ -48,8 +47,8 @@ public class Post {
     )
     private List<Comment> comments = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL,
-            mappedBy = "post")
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "post_id")
     private List<Report> reports = new ArrayList<>();
     public void addReport(Report report){
         reports.add(report);

@@ -7,8 +7,9 @@ import com.example.cryptoapp.post.dto.PagedResponse;
 import com.example.cryptoapp.post.dto.PostDto;
 import com.example.cryptoapp.post.post_comment.CommentDto;
 import com.example.cryptoapp.post.post_comment.CommentPostDto;
-import com.example.cryptoapp.post.report.ReportDtoAdmin;
-import com.example.cryptoapp.post.report.ReportPostDto;
+import com.example.cryptoapp.post.report.CommentReportDto;
+import com.example.cryptoapp.post.report.PostReportDto;
+import com.example.cryptoapp.post.report.ReportDto;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
 @RestController
 @RequestMapping("/post")
 public class PostController {
@@ -24,6 +26,12 @@ public class PostController {
 
     public PostController(PostService postService) {
         this.postService = postService;
+    }
+
+    @PostMapping("")
+    public ResponseEntity<?> addPost(@Valid @RequestBody AddPostDto addPostDto){
+        PostDto postDto = postService.addPost(addPostDto);
+        return new ResponseEntity<>(postDto, HttpStatus.CREATED);
     }
 
     @GetMapping("/list")
@@ -39,16 +47,16 @@ public class PostController {
         return new ResponseEntity<>(post, HttpStatus.OK);
     }
 
-    @PostMapping("")
-    public ResponseEntity<?> addPost(@Valid @RequestBody AddPostDto addPostDto){
-        PostDto postDto = postService.addPost(addPostDto);
-        return new ResponseEntity<>(postDto, HttpStatus.CREATED);
-    }
-
     @DeleteMapping("/{postId}")
     public ResponseEntity<?> deletePost(@PathVariable Long postId){
         postService.deletePost(postId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/report/list")
+    public ResponseEntity<?> getPostReports(){
+        List<PostReportDto> postReports = postService.getPostReports();
+        return new ResponseEntity<>(postReports, HttpStatus.OK);
     }
 
     @PostMapping("/{postId}/comment")
@@ -71,8 +79,8 @@ public class PostController {
     }
 
     @PostMapping("/{postId}/report")
-    public ResponseEntity<?> reportPost(@Valid @RequestBody ReportPostDto reportPostDto, @PathVariable Long postId){
-        postService.reportPost(reportPostDto, postId);
+    public ResponseEntity<?> reportPost(@Valid @RequestBody ReportDto reportDto, @PathVariable Long postId){
+        postService.reportPost(reportDto, postId);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -82,16 +90,22 @@ public class PostController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{postId}/report/list")
-    public ResponseEntity<?> getPostReports(@PathVariable Long postId, @RequestParam(name = "size", defaultValue = "10") int size,
-                                            @RequestParam(name = "page", defaultValue = "0") int page){
-        List<ReportDtoAdmin> reports = postService.getPostReports(postId, PageRequest.of(page, size));
-        return new ResponseEntity<>(reports, HttpStatus.OK);
-    }
-
     @DeleteMapping("/{postId}/report/{reportId}")
     public ResponseEntity<?> deleteReport(@PathVariable Long postId, @PathVariable Long reportId){
         postService.deletePostReportById(reportId, postId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @PostMapping("/comment/{commentId}/report")
+    public ResponseEntity<?> reportComment(@Valid @RequestBody ReportDto reportDto, @PathVariable Long commentId){
+        postService.reportComment(commentId, reportDto);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/comment/report/list")
+    public ResponseEntity<List<CommentReportDto>> getCommentReports(){
+        List<CommentReportDto> commentReports = postService.getCommentReports();
+        return new ResponseEntity<>(commentReports, HttpStatus.OK);
+    }
+
 }

@@ -1,8 +1,6 @@
 package com.example.cryptoapp.crypto.alert;
 
-import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -16,7 +14,6 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
     boolean existsByAlertPriceAndUserIdAndCoin_Name(BigDecimal alertPrice, Long userId, String coinSymbol);
     List<Alert> findAllByUserId(Long userId);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query(nativeQuery = true, value = "select * from alert where alert.id = :id")
+    @Query(nativeQuery = true, value = "select * from alert where alert.id = :id for update")
     Optional<Alert> findByIdWithLock(@Param("id") Long id);
 }

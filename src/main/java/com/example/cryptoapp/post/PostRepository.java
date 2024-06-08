@@ -15,9 +15,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findAll(Pageable pageable);
     @Query(nativeQuery = true, value = "select * from post where id = :postId and is_verified = true")
     Optional<Post> findVerifiedPostById(@Param("postId") Long postId);
-
     boolean existsByIdAndIsVerified(Long postId, boolean isVerified);
-
-    @Query(nativeQuery = true, value = "select count(id) from post where id = :postId")
-    int countPostComments(@Param("postId") Long postId);
 }

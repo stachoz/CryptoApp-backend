@@ -1,7 +1,6 @@
 package com.example.cryptoapp.post.report;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import com.example.cryptoapp.post.post_comment.CommentDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,10 +8,10 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public class ReportPostDto {
-    @Size(max = 200)
-    @NotNull
+@AllArgsConstructor
+public class CommentReportDto {
+    private Long id;
     private String cause;
+    private CommentDto comment;
 }

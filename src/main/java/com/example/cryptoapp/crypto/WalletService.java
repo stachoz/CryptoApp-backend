@@ -1,5 +1,6 @@
 package com.example.cryptoapp.crypto;
 
+import com.binance.connector.client.exceptions.BinanceClientException;
 import com.example.cryptoapp.crypto.coin.coin.Coin;
 import com.example.cryptoapp.crypto.coin.coin.CoinRepository;
 import com.example.cryptoapp.crypto.coin.trasnaction.*;
@@ -59,6 +60,12 @@ public class WalletService {
         transactionRepository.delete(transactionToDelete);
     }
 
+    /**
+     * @param dto DTO with data that will replace last transaction on this coin
+     * @param coinSymbolToUpdate Coin symbol e.g. "BTC" that represents the coin that is going to be updated
+     * @throws NoSuchElementException if there is no transaction to update
+     * @return updated object
+     */
     public TransactionDto updateLastCoinTransaction(AddTransactionDto dto, String coinSymbolToUpdate){
         User user = userService.getCurrentUser();
         Long userId = user.getId();
@@ -71,6 +78,12 @@ public class WalletService {
         return transactionDtoMapper.map(saved);
     }
 
+    /**
+     * @param dto new transaction dto
+     * @param lastCoinTransaction optional last transaction object
+     * @throws BinanceClientException if coin is not supported by binance
+     * @throws OperationConflictException if transaction is selling more than it is possible
+     */
     private void validateTransaction(AddTransactionDto dto,  Optional<Transaction> lastCoinTransaction){
         String coinSymbol = dto.getSymbol();
         binanceValidator.validateCoinBinanceSupport(coinSymbol);
