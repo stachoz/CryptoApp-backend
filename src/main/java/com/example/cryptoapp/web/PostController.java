@@ -59,6 +59,12 @@ public class PostController {
         return new ResponseEntity<>(postReports, HttpStatus.OK);
     }
 
+    @DeleteMapping("/report/{id}")
+    public ResponseEntity<?> deletePostReport(@PathVariable Long id){
+        postService.deletePostReport(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @PostMapping("/{postId}/comment")
     public ResponseEntity<?> commentPost(@Valid @RequestBody CommentPostDto dto, @PathVariable Long postId){
         postService.commentPost(dto, postId);
@@ -72,9 +78,9 @@ public class PostController {
         return new ResponseEntity<>(postComments, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{postId}/comment/{commentId}")
-    public ResponseEntity<?> removePostComment(@PathVariable Long postId, @PathVariable Long commentId){
-        postService.deletePostComment(postId, commentId);
+    @DeleteMapping("/comment/{commentId}")
+    public ResponseEntity<?> removePostComment(@PathVariable Long commentId){
+        postService.deletePostComment(commentId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -88,12 +94,6 @@ public class PostController {
     public ResponseEntity<?> verifyPost(@PathVariable Long postId){
         postService.verifyPost(postId);
         return ResponseEntity.ok().build();
-    }
-
-    @DeleteMapping("/{postId}/report/{reportId}")
-    public ResponseEntity<?> deleteReport(@PathVariable Long postId, @PathVariable Long reportId){
-        postService.deletePostReportById(reportId, postId);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/comment/{commentId}/report")

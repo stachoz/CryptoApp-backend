@@ -40,16 +40,12 @@ public class Post {
     @JoinColumn(name = "author_id")
     private User user;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(
-            name = "post_id",
-            referencedColumnName = "id"
-    )
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "post_id")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "post", orphanRemoval = true)
     private List<Report> reports = new ArrayList<>();
+
     public void addReport(Report report){
         reports.add(report);
     }

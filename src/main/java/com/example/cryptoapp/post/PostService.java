@@ -6,6 +6,7 @@ import com.example.cryptoapp.post.post_comment.*;
 import com.example.cryptoapp.post.report.*;
 import com.example.cryptoapp.user.User;
 import com.example.cryptoapp.user.UserService;
+import jakarta.transaction.Transactional;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -70,11 +71,8 @@ public class PostService {
     }
 
     public void deletePost(Long postId){
-        try {
-            postRepository.deleteById(postId);
-        } catch (EmptyResultDataAccessException e){
-            throw new NoSuchElementException("post with id (" + postId + ") does not exists");
-        }
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("post with id (" + postId + ") not found"));
+        postRepository.delete(post);
     }
 
     public void commentPost(CommentPostDto dto, Long postId){
@@ -86,12 +84,9 @@ public class PostService {
         comment.setPost(post);
         commentRepository.save(comment);
     }
-
-    public void deletePostComment(Long postId, Long commentId){
-        Post post = postRepository.findVerifiedPostById(postId).orElseThrow(() -> new NoSuchElementException("post with id (" + postId + ") not found"));
-        if(!post.getComments().removeIf(comment -> comment.getId().equals(commentId))){
-            throw new NoSuchElementException("comment with id (" + commentId + ") not found");
-        }
+    public void deletePostComment(Long commentId){
+        Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NoSuchElementException("comment with id (" + commentId + ") not found"));
+        commentRepository.delete(comment);
     }
 
     public PagedResponse<CommentDto> getPostComments(PageRequest pr, Long postId){
@@ -112,12 +107,12 @@ public class PostService {
         );
     }
 
-
+    @Transactional
     public void reportPost(ReportDto reportFormDto, Long postId){
         Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("post with id (" + postId + ") not found"));
         Report report = reportDtoMapper.mapToPostReportDto(reportFormDto);
-        post.addReport(report);
-        postRepository.save(post);
+        report.setPost(post);
+        reportRepository.save(report);
     }
 
     public List<PostReportDto> getPostReports(){
@@ -127,20 +122,16 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
+    public void deletePostReport(Long reportId){
+        Report report = reportRepository.findById(reportId).orElseThrow(() -> new NoSuchElementException("report with id (" + reportId + ") not found"));
+        reportRepository.delete(report);
+    }
+
     public List<CommentReportDto> getCommentReports(){
         return reportRepository.getAllCommentReports()
                 .stream()
                 .map(report -> reportDtoMapper.mapToCommentReportDto(report))
                 .collect(Collectors.toList());
-    }
-
-    public void deletePostReportById(Long reportId, Long postId){
-        if(!postRepository.existsById(postId)) throw  new NoSuchElementException("post with id (" + postId + ") not found");
-        try {
-            reportRepository.deleteById(reportId);
-        } catch (EmptyResultDataAccessException exception){
-            throw new NoSuchElementException("post report with id (" + reportId + ") not found");
-        }
     }
 
     public void verifyPost(Long postId){
@@ -150,11 +141,12 @@ public class PostService {
         postRepository.save(post);
     }
 
+    @Transactional
     public void reportComment(Long commentId, ReportDto reportDto) {
         Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new NoSuchElementException("comment with id (" + commentId + ") not found"));
         Report report = reportDtoMapper.mapToPostReportDto(reportDto);
-        comment.addReport(report);
-        commentRepository.save(comment);
+        report.setComment(comment);
+        reportRepository.save(report);
     }
 
     private void isPageOutOfBounds(int pageNumber, int totalPages){

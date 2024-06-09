@@ -19,11 +19,16 @@ public class Report {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @NotNull
     @Length(min = 2, max = 200)
     private String cause;
-    @ManyToOne
+
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "post_id", referencedColumnName = "id")
     private Post post;
-    @ManyToOne
+
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "comment_id", referencedColumnName = "id")
     private Comment comment;
 }

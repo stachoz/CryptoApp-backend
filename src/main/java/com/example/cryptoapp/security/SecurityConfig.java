@@ -50,15 +50,15 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/post/*").hasAnyRole(ADMIN_ROLE)
                         .requestMatchers(HttpMethod.GET, "/post/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/post/report/list").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/post/*/report").authenticated() // make if only for admin and moderator
+                        .requestMatchers(HttpMethod.DELETE, "/post/report/*").authenticated() // make it for admin and mod
+                        .requestMatchers(HttpMethod.POST, "/post/*/report").authenticated() // make it only for admin and moderator
                         .requestMatchers(HttpMethod.GET, "/post/comment/report/list").authenticated() // this one too
                         .requestMatchers(HttpMethod.POST, "/post/comment/*/report").authenticated()
                         .requestMatchers(HttpMethod.POST, "/post/*/verify").hasRole(ADMIN_ROLE)
                         .requestMatchers(HttpMethod.POST, "/post/*/comment").authenticated()
                         .requestMatchers(HttpMethod.GET , "/post/*/comment/list").permitAll()
-                        .requestMatchers(HttpMethod.DELETE , "/post/*/comment/*").hasRole(ADMIN_ROLE)
+                        .requestMatchers(HttpMethod.DELETE , "/post/comment/*").hasRole(ADMIN_ROLE)
                         .requestMatchers(HttpMethod.GET, "/post/*/report/list").hasRole(ADMIN_ROLE)
-                        .requestMatchers(HttpMethod.DELETE, "/post/*/report/*").hasRole(ADMIN_ROLE)
 
                         .requestMatchers(HttpMethod.GET, "wallet/transactions/lastOnCoins").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "wallet/transactions/lastOnCoins/*").authenticated()

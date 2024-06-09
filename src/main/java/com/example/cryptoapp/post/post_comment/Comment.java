@@ -11,6 +11,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,9 +27,11 @@ public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Size(max = 500)
     @NotEmpty
     private String content;
+
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     private Date timeAdded;
@@ -45,9 +49,10 @@ public class Comment {
             referencedColumnName = "id"
     )
     private Post post;
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "comment_id")
+
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Report> reports = new ArrayList<>();
+
     public void addReport(Report report) {
         reports.add(report);
     }

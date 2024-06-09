@@ -13,6 +13,7 @@ import java.util.Date;
 @AllArgsConstructor
 public class CommentDto {
     private Long id;
+    private Long postId;
     private String content;
     private Date timeAdded;
     private String authorUsername;

@@ -7,11 +7,16 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class JWTGenerator {
@@ -22,11 +27,15 @@ public class JWTGenerator {
 
     public String generateToken(Authentication authentication){
         String username = authentication.getName();
+        List<String> authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
         Date currentDate = new Date();
         Date expireDate = new Date(currentDate.getTime() + JWT_EXPIRATION);
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date())
+                .claim("authorities", authorities)
                 .expiration(expireDate)
                 .signWith(key())
                 .compact();
