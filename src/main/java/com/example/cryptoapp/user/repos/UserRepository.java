@@ -8,17 +8,13 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface UserRepository extends CrudRepository<User, Long> {
-    List<User> findAllByUserRoles_RoleName(String userRole);
     Optional<User> findByUsername(String username);
     boolean existsUserByEmail(String email);
     boolean existsUserByUsername(String username);
-    void deleteByUsername(String username);
-
     /**
      * Check if table has any content
      * @return 1 if first row exists otherwise 0
@@ -29,4 +25,6 @@ public interface UserRepository extends CrudRepository<User, Long> {
     @Query(nativeQuery = true, value = "select count(p.id) from application_user u join post p on u.id = p.author_id where u.username = :u")
     int countUserPosts(@Param("u") String username);
     Page<User> findAll(Pageable pageable);
+    Page<User> findUserByIsLocked(boolean locked, Pageable pageable);
+
 }

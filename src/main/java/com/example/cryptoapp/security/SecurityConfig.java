@@ -34,6 +34,7 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         final String ADMIN_ROLE = "ADMIN";
         final String USER_ROLE = "USER";
+        final String MODERATOR_ROLE = "MODERATOR";
 
         return http
                 .cors(Customizer.withDefaults())
@@ -42,17 +43,18 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers(HttpMethod.PUT, "/user/*/access").hasRole(ADMIN_ROLE)
+                        .requestMatchers(HttpMethod.PATCH, "/user/list/access").hasAnyRole(ADMIN_ROLE, MODERATOR_ROLE)
                         .requestMatchers(HttpMethod.DELETE, "/user/*").hasRole(ADMIN_ROLE)
                         .requestMatchers(HttpMethod.GET, "/user/*").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/user/list/role").hasAnyRole(ADMIN_ROLE, MODERATOR_ROLE)
 
                         .requestMatchers(HttpMethod.POST, "/post").hasAnyRole(ADMIN_ROLE, USER_ROLE)
                         .requestMatchers(HttpMethod.DELETE, "/post/*").hasAnyRole(ADMIN_ROLE)
                         .requestMatchers(HttpMethod.GET, "/post/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/post/report/list").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/post/report/*").authenticated() // make it for admin and mod
-                        .requestMatchers(HttpMethod.POST, "/post/*/report").authenticated() // make it only for admin and moderator
-                        .requestMatchers(HttpMethod.GET, "/post/comment/report/list").authenticated() // this one too
+                        .requestMatchers(HttpMethod.DELETE, "/post/report/*").hasAnyRole(ADMIN_ROLE, MODERATOR_ROLE)
+                        .requestMatchers(HttpMethod.POST, "/post/*/report").hasAnyRole(ADMIN_ROLE, MODERATOR_ROLE)
+                        .requestMatchers(HttpMethod.GET, "/post/comment/report/list").hasAnyRole(ADMIN_ROLE, MODERATOR_ROLE)
                         .requestMatchers(HttpMethod.POST, "/post/comment/*/report").authenticated()
                         .requestMatchers(HttpMethod.POST, "/post/*/verify").hasRole(ADMIN_ROLE)
                         .requestMatchers(HttpMethod.POST, "/post/*/comment").authenticated()
@@ -90,7 +92,7 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
-        configuration.setAllowedMethods(Arrays.asList("GET","POST", "OPTIONS", "DELETE", "PUT"));
+        configuration.setAllowedMethods(Arrays.asList("GET","POST", "OPTIONS", "DELETE", "PUT", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

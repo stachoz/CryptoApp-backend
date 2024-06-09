@@ -57,4 +57,8 @@ public class User {
     @OneToMany(mappedBy = "user",
             cascade = CascadeType.REMOVE)
     private Set<Comment> comments = new HashSet<>();
+
+    public void addUserRole(UserRole userRole){
+        this.userRoles.add(userRole);
+    }
 }

@@ -48,6 +48,15 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    public List<UserDto> getAllBlockedUsers(PageRequest pageRequest) {
+        Page<User> pageOfUsers = userRepository.findUserByIsLocked(true, pageRequest);
+        int pageNumber = pageRequest.getPageNumber();
+        if(pageNumber != 0 && pageNumber + 1 > pageOfUsers.getTotalPages()) throw new NoSuchElementException("page " + pageNumber + " is out of bounds");
+        return pageOfUsers.stream()
+                .map(UserDtoMapper::map)
+                .collect(Collectors.toList());
+    }
+
     public UserDto registerUser(UserRegistrationDto dto){
         User user = userRegistrationDtoMapper.map(dto);
         List<String> errors = checkUserCredentials(user);
@@ -96,8 +105,9 @@ public class UserService {
         return UserDtoMapper.map(user);
     }
 
-    public void changeUserAccess(Long userId, UserOperationDto dto){
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+    public void changeUserAccess(String username, UserOperationDto dto){
+//        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
         if(isUserAdmin(user)) throw new UserNotFoundException(user.getId());
         switch (dto.getOperation()){
             case BLOCK -> blockUser(user);
@@ -112,6 +122,14 @@ public class UserService {
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsername(name).orElseThrow(NoSuchElementException::new);
     }
+
+    public void addUserRole(String role, String username){
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException(username));
+        UserRole userRole = userRoleRepository.findUserRoleByRoleName(role).orElseGet(() -> userRoleRepository.save(new UserRole(role)));
+        user.addUserRole(userRole);
+        userRepository.save(user);
+    }
+
     private List<String> checkUserCredentials(User user){
         List<String> errorMessages = new ArrayList<>();
         String username = user.getUsername();
